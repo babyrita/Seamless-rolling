@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 500px;
+            height: 200px;
+            padding: 7px;
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 3000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+
+    </style>
+    <script>
+        window.onload=function(){
+            var all = document.getElementById("all");
+            var screen = document.getElementById("screen");
+            var imgWidth = screen.offsetWidth;
+            var ul = document.getElementById("ul");
+            var ulLiArr = ul.children;
+            var ol = document.getElementsByTagName("ol")[0];
+            var arr = document.getElementById("arr");
+            var left = document.getElementsByClassName("left");
+            var right = document.getElementsByClassName("right");
+            //把第一个li深度复制到ul的末尾
+            ul.appendChild(ulLiArr[0].cloneNode(true));
+            //添加ol中的li个数 === ul中li的个数-1
+            for(var i=0;i<ulLiArr.length-1;i++){
+                var newLi = document.createElement("li");
+                newLi.innerHTML = i+1;
+                ol.appendChild(newLi);
+            }
+            var olLiArr = ol.children;
+            olLiArr[0].className = "current";//点亮
+            for(var i=0;i<olLiArr.lenght;i++){
+                olLiArr[i].index = i;
+                olLiArr[i].onclick = function(){
+                    for(var j=0;j<olLiArr.length;j++){
+                        olLiArr[j].className= "";//干掉所有人
+                    }
+                    this.className = "current";//剩下我自己
+                    animate(ul,-imgWidth*this.index);
+                    key = aquare = this.index;
+                }
+            }
+
+            var key = 0;
+            var square = 0;
+            right.onclick = autoplay;
+            left.onclick = function(){
+                key--;
+                if(key === -1){
+                    ul.style.left = -imgWidth*5+"px";
+                    key = 4;
+                }
+                square--;
+                if(square === -1){
+                    aquare = 4;
+                }
+                for(var i=0;i<olLiArr.length;i++){
+                    olLiArr[i].className = "";
+                }
+                olLiArr[square].className = "current";
+                animate(ul,-imgWidth*hey);
+            }
+            var timer = setInterval(autoplay,1000);
+            all.onmouseover = function(){
+                arr.style.display = "block";
+                clearInterval(timer);
+            }
+            all.onmouseout = function(){
+                arr.style.display = "none";
+                timer = setInterval(autoplay,1000);
+            }
+            function autoplay(){
+                key++;//图片索引值自增,图片向右反动
+                if(key === 6){//一共6张图,索引值最大是5,为6的时候,闪动去第一图
+                    ul.style.left =0;//给ul赋值,第一个图的坐标是0
+                    key = 1;//然后华东到第2张图
+                }
+                square++;//小方块12345的索引值也自增,和图片一起
+                if(square === 5){//小方块只有5个,索引值最大是4,第5个不在
+                    square = 0;//去第一张图
+                }
+                //点亮小方块
+                for(var i=0;i<olLiArr.length;i++){
+                    olLiArr[i].className="";
+                }
+                olLiArr[square].className = "current";
+                animate(ul,-imgWidth*key)
+            }
+
+            function animate(ele,target){
+                clearInterval(ele.timer);
+                ele.timer = setInterval(function (){
+                    var step = target>ele.offsetLeft?10:-10;
+                    ele.style.left = ele.offsetLeft + step +"px";
+                    if(Math.abs(target - ele.offsetLeft)<= Math.abs(step)){
+                        ele.style.left = target + "px";
+                        clearInterval(ele.timer);
+                    }
+                },10);
+            }
+
+
+
+
+
+        }
+
+    </script>
+</head>
+<body>
+    <!--外盒子-->
+<div class="all" id="all">
+    <div class="screen" id="screen">
+        <ul id="ul">
+            <li><img src="images/1.jpg" width="500" height="200" alt=""></li>
+        </ul>
+        <!--小方块-->
+        <ol></ol>
+        <div id="arr">
+            <span class="left"></span>
+            <span class="right"></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

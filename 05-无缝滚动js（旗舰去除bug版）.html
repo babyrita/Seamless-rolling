@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 500px;
+            height: 200px;
+            padding: 7px;
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 3000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+
+    </style>
+    <script>
+        window.onload = function (){
+            var all = document.getElementById("all");
+            var screen = document.getElementById("screen");
+            var imgWidth = screen.offsetWidth;
+            var ul = document.getElementById("ul");
+            var ulLiArr = ul.children;
+            var ol = document.getElementsByTagName("ol")[0];
+            var arr = document.getElementById("arr");
+            var left = document.getElementById("left");
+            var right = document.getElementById("right");
+
+            ul.appendChild(ulLiArr[0].cloneNode(true));//把第一个li深度复制到ul的末尾
+
+            for(var i=0;i<ulLiArr.length-1;i++){//添加ol中li的个数===ul中li的个数-1;
+                var newLi = document.createElement("li");
+                newLi.innerHTML = i+1;
+                ol.appendChild(newLi);
+            }
+
+            //获取元素
+            var olLiArr = ol.children;
+            //点亮li
+            olLiArr[0].className = "current";
+
+            //绑定ol中的所有li,遇到这种事儿就for循环遍历
+            for(var i=0;i<olLiArr.length;i++){
+                olLiArr[i].index = i;//设置每一个li的index值,和循环时候的i一致
+                //绑定事件
+                olLiArr[i].onclick = function (){
+                    for(var j=0;j<olLiArr.length;j++){//点亮,排他思想
+                        olLiArr[j].className = "";
+                    }
+                    this.className = "current";//剩下我自己
+                    animate(ul,-imgWidth*this.index);
+                    key = aquare = this.index;
+                }
+            }
+
+
+
+            var key =0;
+            var square = 0;
+            right.onclick = autoplay;
+
+
+            left.onclick = function (){
+                key--;
+                if(key === -1){
+                    ul.style.left = -imgWidth*5+"px";
+                    key = 4;
+                }
+                square--;
+                if(square === -1){
+                    square = 4;
+                }
+                //点亮盒子,点亮谁就循环谁
+                for(var i= 0;i<olLiArr.length;i++){
+                    olLiArr[i].className = "";
+                }
+                olLiArr[square].className = "current";
+                animate(ul,-imgWidth*key);
+            }
+
+
+
+
+            //定时器
+            var timer = setInterval(autoplay,1000);//和右边的逻辑一样
+
+            all.onmouseover = function (){
+                arr.style.display = "block";
+                clearInterval(timer);
+            }
+            all.onmouseout = function (){
+                arr.style.display = "none";
+                timer = setInterval(autoplay,1000);
+            }
+
+
+
+
+//封装autoplay
+            function autoplay(){
+                key++;//图片索引值自增,图片向右反动
+                if(key === 6){//一共6张图,索引值最大是5,为6的时候,闪动去第一个图
+                    ul.style.left = 0;//给ul赋值,第一个图的左边是0
+                    key = 1;//然后滑动到第2张图
+                }
+                square++;//小方块12345的索引值也自增,和图片一起
+                if(square === 5){//小方块只有5个,索引值最大是4,第5个不存在
+                    square = 0;//去第一张图
+                }
+                //点亮小方块
+                for(var i=0;i<olLiArr.length;i++){//排他思想
+                    olLiArr[i].className = "";
+                }
+                olLiArr[square].className = "current";
+                animate(ul,-imgWidth*key)
+            }
+
+
+
+//封装animate方法,可以按照目标目标值移动盒子;
+            function animate(ele,target){
+                //要用定时器,先清除定时器;
+                clearInterval(ele.timer);
+                //每个盒子一个定时器;把定时器作为盒子的属性设置;(自定义属性)
+                ele.timer = setInterval(function () {
+                    //步长不能永远为10; 因为步长的取值要经过计算;
+                    var step = target>ele.offsetLeft?10:-10;
+                    //移动盒子
+                    ele.style.left = ele.offsetLeft + step + "px";
+
+                    //判断:到达目标位置停止定时器
+                    //解决小数问题;  目标位置和当前位置之间的距离不足一个步长的时候;
+                    if(Math.abs(target-ele.offsetLeft) <= Math.abs(step)){
+                        //设置目标位置为target,并清除定时器;
+                        ele.style.left = target + "px";
+                        clearInterval(ele.timer);
+                    }
+                },10);
+            }
+
+
+        }
+
+
+    </script>
+
+</head>
+<body>
+    <!--外盒子-->
+    <div class="all" id='all'>
+        <!--内盒子-->
+        <div class="screen" id="screen">
+            <ul id="ul">
+                <li><img src="images/1.jpg" width="500" height="200"/></li>
+                <li><img src="images/2.jpg" width="500" height="200"/></li>
+                <li><img src="images/3.jpg" width="500" height="200"/></li>
+                <li><img src="images/4.jpg" width="500" height="200"/></li>
+                <li><img src="images/5.jpg" width="500" height="200"/></li>
+            </ul>
+            <!--小方块-->
+            <ol>
+
+            </ol>
+            <!--左右小三角-->
+            <div id="arr">
+                <span id="left"><</span>
+                <span id="right">></span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
